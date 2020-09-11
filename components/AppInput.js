@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, StyleSheet, TextInput } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import colors from '../config/colors';
+import ThemeContext from '../themes/ThemeContext';
 
 export default function AppInput({ icon, placeholder, onChangeText, iconColor, style, ...otherProps }) {
+
+    const { theme } = useContext(ThemeContext);
+
     return (
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { backgroundColor: theme.secondary }]}>
             <TextInput placeholder={placeholder}
                 placeholderTextColor='#ccc'
                 autoCapitalize='none'
@@ -28,7 +32,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'flex-end',
         alignItems: 'center',
-        backgroundColor: colors.secondary,
         borderBottomColor: colors.primary,
     },
     input: {

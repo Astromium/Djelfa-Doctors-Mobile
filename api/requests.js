@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-const endPoint = 'http://192.168.1.7:3000/api/v1'
+const endPoint = 'https://djelfa-doctors.herokuapp.com/api/v1'
 
 const createRequest = async (req) => {
     try {

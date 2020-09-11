@@ -7,7 +7,7 @@ const store = async (key, value) => {
 
         const item = {
             value,
-            createdAt: Date.now()
+            //createdAt: Date.now()
         }
 
         await AsyncStorage.setItem(key, JSON.stringify(item))
@@ -22,10 +22,10 @@ const get = async (key) => {
         const value = await AsyncStorage.getItem(key);
         if (!value) return null
         const item = JSON.parse(value);
-        if (Date.now() - item.createdAt >= expiry) {
-            await AsyncStorage.removeItem(key);
-            return null
-        }
+        // if (Date.now() - item.createdAt >= expiry) {
+        //     await AsyncStorage.removeItem(key);
+        //     return null
+        // }
         return item
     } catch (err) {
         console.log(err)

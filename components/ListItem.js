@@ -1,56 +1,58 @@
-import React from 'react';
-import { View, StyleSheet, TouchableNativeFeedback } from 'react-native';
+import React, { useContext, memo } from 'react';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 
 import AppText from '../components/AppText';
 import colors from '../config/colors';
+import ThemeContext from '../themes/ThemeContext';
 
-class ListItem extends React.PureComponent {
-    render() {
-        return (
-            <TouchableNativeFeedback onPress={this.props.onPress}>
-                <View style={styles.container}>
-                    <View style={styles.detailsContainer}>
-                        <AppText style={styles.itemTitle}>{this.props.title}</AppText>
-                        <AppText style={styles.itemSubtitle}>{this.props.subTitle}</AppText>
-                    </View>
-                    <View style={styles.imageContainer}>
-                        {this.props.children}
-                    </View>
+
+function ListItem({ onPress, title, subTitle, children }) {
+
+    const { theme } = useContext(ThemeContext);
+
+    return (
+        <TouchableOpacity onPress={onPress} style={{ width: '100%' }}>
+            <View style={[styles.container, { backgroundColor: theme.secondary }]}>
+                <View style={styles.detailsContainer}>
+                    <AppText style={styles.itemTitle}>{title}</AppText>
+                    <AppText style={styles.itemSubtitle}>{subTitle}</AppText>
                 </View>
-            </TouchableNativeFeedback>
-        )
-    }
+                <View style={[styles.imageContainer, { backgroundColor: theme.type === 'green' ? theme.headerBg : theme.accent }]}>
+                    {children}
+                </View>
+            </View>
+        </TouchableOpacity>
+    )
+
 
 }
 
-export default ListItem
+export default memo(ListItem)
 
 const styles = StyleSheet.create({
     container: {
         width: '100%',
         marginVertical: 10,
-        paddingVertical: 10,
         borderRadius: 10,
-        backgroundColor: colors.secondary,
         elevation: 2,
-        flexDirection: 'row'
+        flexDirection: 'row',
+        overflow: 'hidden'
     },
     imageContainer: {
         height: 100,
-        width: '30%',
-        borderRadius: 50,
-        backgroundColor: colors.accent,
-        padding: 10,
+        paddingVertical: 10,
         elevation: 3,
         justifyContent: 'center',
         alignItems: 'center',
-        marginLeft: 10
+        flex: 1,
+        borderTopLeftRadius: 75,
+        borderBottomLeftRadius: 75
     },
     detailsContainer: {
-        marginRight: 2,
-        height: 100,
+        marginRight: 10,
         width: '60%',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        alignItems: 'flex-end'
     },
     itemTitle: {
         fontSize: 18,
@@ -58,6 +60,7 @@ const styles = StyleSheet.create({
     },
     itemSubtitle: {
         fontSize: 16,
-        color: colors.primary
+        color: colors.primary,
+        width: '95%',
     }
 })

@@ -1,28 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, ActivityIndicator, Modal, FlatList, Text, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, StyleSheet, ActivityIndicator, Modal, ScrollView, Dimensions } from 'react-native';
+import { BarChart } from 'react-native-chart-kit'
+import Swiper from 'react-native-swiper'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import doctors from '../api/doctors';
-import AppActivityIndicator from './ActivityIndicator';
+import AppActivityIndicator from './AppActivityIndicator';
 import ListItem from './ListItem';
 import AppInput from './AppInput';
+import AppText from './AppText';
 import RequestDoctor from './RequestDoctor';
 import DoctorSvg from '../Svgs/DoctorSvg';
 import FemaleDoctor from '../Svgs/FemaleDoctor';
 import NotFound from './NotFound';
 import colors from '../config/colors';
 import cache from '../utility/cache';
+import ThemeContext from '../themes/ThemeContext';
+
+
+
+
 
 
 
 export default function AllDoctors({ navigation }) {
 
+    const { theme } = useContext(ThemeContext);
+
     const [loaderVisible, setLoaderVisible] = useState(true)
-    const [searchLoaderVisible, setSearchLoaderVisible] = useState(false)
+    const [filterVisible, setFilterVisible] = useState(false)
     const [notFoundVisible, setNotFoundVisible] = useState(false)
     const [modalVisible, setModalVisible] = useState(false)
     const [docs, setDocs] = useState([])
     const [backup, setBackup] = useState([])
-    const [reachedEnd, setReachedEnd] = useState(false)
+
 
     const loadDoctors = async () => {
         try {
@@ -31,15 +42,15 @@ export default function AllDoctors({ navigation }) {
             const cacheData = await cache.get('data')
             if (cacheData) {
                 //console.log('got data from cache')
+                setBackup([])
                 setDocs(cacheData.value)
-                setBackup(cacheData.value)
                 setLoaderVisible(false)
+
             } else {
                 // else call the server
                 const res = await doctors.getAllDoctors();
                 if (res.status === 'success') {
                     setDocs(res.doctors);
-                    setBackup(res.doctors);
                     setLoaderVisible(false)
                     await cache.store('data', res.doctors);
                 } else {
@@ -51,42 +62,32 @@ export default function AllDoctors({ navigation }) {
         }
     }
 
-    const renderFooter = () => {
 
-        if (!reachedEnd) {
-            return (
-                <View style={{ width: '100%', height: 150, alignItems: 'center' }}>
-                    <ActivityIndicator color={colors.primary} animating={!reachedEnd} size='large' />
-                </View>
-            )
-        }
-        return (
-            <View style={{ width: '100%', height: 100 }}></View>
-        )
-
-    }
 
     useEffect(() => {
         loadDoctors()
     }, [])
 
     const handleSearch = async (text) => {
-
+        setFilterVisible(true)
         if (!text) {
+            setFilterVisible(false)
             setNotFoundVisible(false)
-            setDocs(backup)
+            setBackup([])
         } else {
-            setSearchLoaderVisible(true)
+            setFilterVisible(false)
+            setNotFoundVisible(false);
             let temp = docs.filter(doc => doc.name.includes(text));
+
             if (temp.length === 0) {
-                setSearchLoaderVisible(false);
+                setFilterVisible(false);
                 setNotFoundVisible(true);
-                setDocs([])
+                setBackup([])
                 return
             } else {
                 setNotFoundVisible(false)
-                setSearchLoaderVisible(false)
-                setDocs(temp)
+                setFilterVisible(false)
+                setBackup([...temp])
             }
 
         }
@@ -95,7 +96,7 @@ export default function AllDoctors({ navigation }) {
 
     if (loaderVisible) {
         return (
-            <View style={styles.loaderContainer}>
+            <View style={[styles.loaderContainer, { backgroundColor: theme.headerBg }]}>
                 <AppActivityIndicator visible={loaderVisible} />
             </View>
         )
@@ -103,16 +104,17 @@ export default function AllDoctors({ navigation }) {
 
 
     return (
-        <View>
+        <ScrollView style={{ backgroundColor: theme.accent, flex: 1 }}>
             <View style={{ width: '100%' }}>
                 <AppInput icon='magnify' iconColor={colors.white} placeholder='أدخل اسم الطبيب' onChangeText={text => handleSearch(text)} />
             </View>
-            {searchLoaderVisible && <View style={{ height: '100%', width: '100%' }}><ActivityIndicator animating={searchLoaderVisible} size='large' /></View>}
+            {filterVisible && <View style={{ height: 50, width: '100%', justifyContent: 'center', alignItems: 'center' }}><AppText>Loading</AppText></View>}
             {notFoundVisible && <NotFound width='80%' height={250} onPress={() => setModalVisible(true)} />}
-            {/* <ScrollView style={styles.listContainer}>
+            {backup.length > 0 && <ScrollView style={styles.listContainer}>
                 <View style={styles.list}>
-                    {docs.map(doc => {
+                    {backup.map(doc => {
                         return (
+
                             <ListItem onPress={() => navigation.navigate('Doctor', {
                                 id: doc._id,
                                 title: doc.name
@@ -122,14 +124,44 @@ export default function AllDoctors({ navigation }) {
                         )
                     })}
                 </View>
-            </ScrollView> */}
-            <FlatList
+            </ScrollView>}
+            <View style={styles.recent}>
+                <View style={{ alignSelf: 'flex-end', flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                    <MaterialCommunityIcons name='apps' size={26} color={theme.primary} />
+                    <AppText style={styles.recentTitle}>أحدث الإضافات</AppText>
+                </View>
+                <ListItem onPress={() => {
+                    navigation.navigate('Doctor', {
+                        id: docs[docs.length - 1]._id,
+                        title: docs[docs.length - 1].name
+                    })
+                }} key={docs[docs.length - 1]._id} title={docs[docs.length - 1].name} subTitle={docs[docs.length - 1].description}>
+                    {docs[docs.length - 1].gender === 'male' ? <DoctorSvg /> : <FemaleDoctor />}
+                </ListItem>
+                <ListItem onPress={() => {
+                    navigation.navigate('Doctor', {
+                        id: docs[docs.length - 2]._id,
+                        title: docs[docs.length - 2].name
+                    })
+                }} key={docs[docs.length - 2]._id} title={docs[docs.length - 2].name} subTitle={docs[docs.length - 2].description}>
+                    {docs[docs.length - 2].gender === 'male' ? <DoctorSvg /> : <FemaleDoctor />}
+                </ListItem>
+                <ListItem onPress={() => {
+                    navigation.navigate('Doctor', {
+                        id: docs[docs.length - 3]._id,
+                        title: docs[docs.length - 3].name
+                    })
+                }} key={docs[docs.length - 3]._id} title={docs[docs.length - 3].name} subTitle={docs[docs.length - 3].description}>
+                    {docs[docs.length - 3].gender === 'male' ? <DoctorSvg /> : <FemaleDoctor />}
+                </ListItem>
+            </View>
+            {/* <FlatList
                 style={styles.listContainer}
                 data={docs}
                 keyExtractor={item => item._id}
                 ListFooterComponent={renderFooter}
                 onEndReached={() => setReachedEnd(true)}
-                renderItem={({ item }) => <TouchableOpacity>
+                renderItem={({ item }) =>
                     <ListItem onPress={() => navigation.navigate('Doctor', {
                         id: item._id,
                         title: item.name
@@ -137,7 +169,187 @@ export default function AllDoctors({ navigation }) {
                         title={item.name} subTitle={item.description}>
                         {item.gender === 'male' ? <DoctorSvg /> : <FemaleDoctor />}
                     </ListItem>
-                </TouchableOpacity>} />
+                } /> */}
+
+            <View style={{ width: '100%', marginTop: 20, justifyContent: 'center', alignItems: 'center' }}>
+                {/* <ScrollView horizontal showsHorizontalScrollIndicator> */}
+                <Swiper activeDotColor={colors.primary} bounces autoplayTimeout={4} height={300} showsHorizontalScrollIndicator={false}  >
+                    <BarChart
+                        data={{
+                            labels: ["general", "neuro", "pediatre", "ophta", "gyneco", "cardio"],
+                            datasets: [
+                                {
+                                    data: [
+                                        docs.filter(doc => doc.speciality === 'general').length,
+                                        docs.filter(doc => doc.speciality === 'neuro').length,
+                                        docs.filter(doc => doc.speciality === 'pediatre').length,
+                                        docs.filter(doc => doc.speciality === 'ophta').length,
+                                        docs.filter(doc => doc.speciality === 'gyneco').length,
+                                        docs.filter(doc => doc.speciality === 'cardio').length
+                                    ]
+                                }
+                            ]
+                        }}
+                        width={Dimensions.get("window").width} // from react-native
+                        height={250}
+                        yAxisInterval={1} // optional, defaults to 1
+                        showValuesOnTopOfBars
+                        chartConfig={{
+                            backgroundColor: theme.accent,
+                            backgroundGradientFrom: theme.accent,
+                            backgroundGradientTo: theme.secondary,
+                            //decimalPlaces: 2, // optional, defaults to 2dp
+                            color: (opacity = 1) => `rgba(28, 205, 187, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(28, 205, 187, ${opacity})`,
+                            style: {
+
+                            },
+                            propsForDots: {
+                                r: "6",
+                                strokeWidth: "2",
+                                stroke: "#ffa726"
+                            }
+                        }}
+                        bezier
+                        fromZero
+                        style={{
+                            marginVertical: 8,
+                            marginRight: 10
+
+                        }}
+                    />
+
+                    <BarChart
+                        data={{
+                            labels: ["intern", "nephro", "rhumato", "pneumo", "orl"],
+                            datasets: [
+                                {
+                                    data: [
+                                        docs.filter(doc => doc.speciality === 'intern').length,
+                                        docs.filter(doc => doc.speciality === 'nephro').length,
+                                        docs.filter(doc => doc.speciality === 'rhumato').length,
+                                        docs.filter(doc => doc.speciality === 'pneumo').length,
+                                        docs.filter(doc => doc.speciality === 'orl').length,
+                                    ]
+                                }
+                            ]
+                        }}
+                        width={Dimensions.get("window").width} // from react-native
+                        height={250}
+                        yAxisInterval={1} // optional, defaults to 1
+                        showValuesOnTopOfBars
+                        chartConfig={{
+                            backgroundColor: theme.accent,
+                            backgroundGradientFrom: theme.accent,
+                            backgroundGradientTo: theme.secondary,
+                            //decimalPlaces: 2, // optional, defaults to 2dp
+                            color: (opacity = 1) => `rgba(28, 205, 187, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(28, 205, 187, ${opacity})`,
+                            style: {
+
+                            },
+                            propsForDots: {
+                                r: "6",
+                                strokeWidth: "2",
+                                stroke: "#ffa726"
+                            }
+                        }}
+                        bezier
+                        fromZero
+                        style={{
+                            marginVertical: 8,
+                            marginRight: 10
+
+                        }}
+                    />
+
+                    <BarChart
+                        data={{
+                            labels: ["radio", "dermato", "diabet", "chirugie", "digest"],
+                            datasets: [
+                                {
+                                    data: [
+                                        docs.filter(doc => doc.speciality === 'radio').length,
+                                        docs.filter(doc => doc.speciality === 'dermato').length,
+                                        docs.filter(doc => doc.speciality === 'diabet').length,
+                                        docs.filter(doc => doc.speciality === 'sergeon').length,
+                                        docs.filter(doc => doc.speciality === 'digest').length,
+                                    ]
+                                }
+                            ]
+                        }}
+                        width={Dimensions.get("window").width} // from react-native
+                        height={250}
+                        yAxisInterval={1} // optional, defaults to 1
+                        showValuesOnTopOfBars
+                        chartConfig={{
+                            backgroundColor: theme.accent,
+                            backgroundGradientFrom: theme.accent,
+                            backgroundGradientTo: theme.secondary,
+                            //decimalPlaces: 2, // optional, defaults to 2dp
+                            color: (opacity = 1) => `rgba(28, 205, 187, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(28, 205, 187, ${opacity})`,
+                            style: {
+
+                            },
+                            propsForDots: {
+                                r: "6",
+                                strokeWidth: "2",
+                                stroke: "#ffa726"
+                            }
+                        }}
+                        bezier
+                        fromZero
+                        style={{
+                            marginVertical: 8,
+                            marginRight: 10
+                        }}
+                    />
+
+                    <BarChart
+                        data={{
+                            labels: ["psyco", "dentist"],
+                            datasets: [
+                                {
+                                    data: [
+                                        docs.filter(doc => doc.speciality === 'psyco').length,
+                                        docs.filter(doc => doc.speciality === 'dentist').length,
+                                    ]
+                                }
+                            ]
+                        }}
+                        width={Dimensions.get("window").width} // from react-native
+                        height={250}
+                        yAxisInterval={1} // optional, defaults to 1
+                        showValuesOnTopOfBars
+                        chartConfig={{
+                            backgroundColor: theme.accent,
+                            backgroundGradientFrom: theme.accent,
+                            backgroundGradientTo: theme.secondary,
+                            //decimalPlaces: 2, // optional, defaults to 2dp
+                            color: (opacity = 1) => `rgba(28, 205, 187, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(28, 205, 187, ${opacity})`,
+                            style: {
+
+                            },
+                            propsForDots: {
+                                r: "6",
+                                strokeWidth: "2",
+                                stroke: "#ffa726"
+                            }
+                        }}
+                        bezier
+                        fromZero
+                        style={{
+                            marginVertical: 8,
+
+                        }}
+                    />
+                    {/* </ScrollView> */}
+                </Swiper>
+            </View>
+
+
 
             <Modal animated animationType='slide' visible={modalVisible}>
                 <RequestDoctor onPress={() => setModalVisible(false)} onAnimationFinish={() => {
@@ -146,7 +358,7 @@ export default function AllDoctors({ navigation }) {
                     setDocs(backup);
                 }} />
             </Modal>
-        </View>
+        </ScrollView>
     )
 
 }
@@ -156,8 +368,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.white
+        alignItems: 'center'
     },
     notFoundContainer: {
         width: '100%',
@@ -174,5 +385,14 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         marginBottom: 20
+    },
+    recent: {
+        width: '100%',
+        marginTop: 20,
+        padding: 10
+    },
+    recentTitle: {
+        fontSize: 22,
+        marginLeft: 5
     }
 })

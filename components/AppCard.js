@@ -1,15 +1,19 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 
 import colors from '../config/colors'
 import AppText from './AppText';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import ThemeContext from '../themes/ThemeContext';
 
-export default function AppCard({ onPress, title, subtitle, children, btn }) {
+
+export default function AppCard({ onPress, title, subtitle, children, btn, right, center }) {
+
+    const { theme, changeTheme } = useContext(ThemeContext);
+
     return (
         <TouchableWithoutFeedback onPress={onPress}>
-            <View style={styles.card}>
-                <View style={styles.imageContainer}>
+            <View style={[styles.card, { backgroundColor: theme.secondary, alignSelf: center ? 'center' : right ? "flex-start" : "flex-end" }]}>
+                <View style={[styles.imageContainer, { backgroundColor: theme.accent }]}>
                     {children}
                 </View>
                 <AppText style={styles.title}>{title}</AppText>
@@ -22,10 +26,9 @@ export default function AppCard({ onPress, title, subtitle, children, btn }) {
 
 const styles = StyleSheet.create({
     card: {
-        width: '80%',
+        width: '75%',
         marginVertical: 50,
         position: 'relative',
-        backgroundColor: colors.secondary,
         alignItems: 'center',
         elevation: 2,
         borderRadius: 15
@@ -37,14 +40,13 @@ const styles = StyleSheet.create({
         padding: 10,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.accent,
         elevation: 4,
         marginTop: -50,
         marginBottom: 10
 
     },
     title: {
-        fontSize: 22,
+        fontSize: 20,
         marginBottom: 10,
         width: '90%',
         lineHeight: 30,

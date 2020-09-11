@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { StyleSheet, View, ActivityIndicator, Alert, ToastAndroid } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import LottieView from 'lottie-react-native';
 
@@ -8,13 +8,20 @@ import AppInput from './AppInput';
 import AppText from './AppText';
 import AppButton from './AppButton';
 import colors from '../config/colors';
+import ThemeContext from '../themes/ThemeContext';
 
 export default function Report({ onAnimationFinish, onPress }) {
+
+    const { theme } = useContext(ThemeContext);
 
     const [animationVisible, setAnimationVisible] = useState(false);
     const [loaderVisible, setLoaderVisible] = useState(false);
     const [message, setMessage] = useState(false);
     const [messageError, setMessageError] = useState(false);
+
+    const showToast = () => {
+        ToastAndroid.show("تم الإرسال بنجاح", ToastAndroid.SHORT);
+    }
 
     const handleSubmit = async () => {
         if (!message) {
@@ -24,9 +31,10 @@ export default function Report({ onAnimationFinish, onPress }) {
                 setLoaderVisible(true)
                 const res = await reports.createReport({ message })
                 if (res.status === 'success') {
-                    console.log('report posted')
+                    //console.log('report posted')
                     setLoaderVisible(false)
                     setAnimationVisible(true)
+                    showToast();
                 }
             } catch (err) {
                 console.log(err)
@@ -46,7 +54,7 @@ export default function Report({ onAnimationFinish, onPress }) {
 
     if (animationVisible) {
         return (
-            <View style={[styles.container]}>
+            <View style={[styles.container, { backgroundColor: theme.accent }]}>
                 <LottieView source={require('../animations/done.json')} autoPlay loop={false} onAnimationFinish={onAnimationFinish} />
             </View>
 
@@ -54,15 +62,15 @@ export default function Report({ onAnimationFinish, onPress }) {
     }
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
+        <View style={[styles.container, { backgroundColor: theme.accent }]}>
+            <View style={[styles.header, { backgroundColor: theme.headerBg }]}>
                 <MaterialCommunityIcons onPress={onPress} name='arrow-left' color={colors.primary} size={25} />
                 <AppText style={styles.headerTitle}>الإبلاغ عن خطأ</AppText>
             </View>
             <View style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                <View style={styles.inputContainer}>
+                <View style={[styles.inputContainer, { backgroundColor: theme.secondary }]}>
                     <AppText style={styles.inputContainerTitle}>إدخال معلومات الطبيب</AppText>
-                    <AppInput multiline={true} numberOfLines={4} onChangeText={(text) => setMessage(text)} style={styles.input} placeholder='اشرح باختصار الخطأ الذي لاحظته' />
+                    <AppInput multiline={true} numberOfLines={4} onChangeText={(text) => setMessage(text)} style={[styles.input, { backgroundColor: theme.accent }]} placeholder='اشرح باختصار الخطأ الذي لاحظته' />
                     {messageError && <AppText style={styles.errorText}>يرجى إدخال المحتوى</AppText>}
                     <AppButton onPress={handleSubmit} width='30%' title='إرسال' color={colors.primary} icon='circle-edit-outline' />
                     {loaderVisible && <ActivityIndicator animating size='large' />}
@@ -76,7 +84,6 @@ const styles = StyleSheet.create({
     container: {
         width: '100%',
         height: '100%',
-        backgroundColor: colors.accent,
         alignItems: 'center'
     },
     inputContainer: {
@@ -96,7 +103,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 200,
         textAlignVertical: 'top',
-        backgroundColor: colors.accent,
         padding: 20,
         marginVertical: 5
     },
@@ -107,7 +113,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 10,
-        backgroundColor: colors.white
     },
     headerTitle: {
         flex: 1,

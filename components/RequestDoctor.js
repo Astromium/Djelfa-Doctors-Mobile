@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { StyleSheet, View, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, Alert, ToastAndroid } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import LottieView from 'lottie-react-native';
 
@@ -18,7 +18,11 @@ export default function RequestDoctor({ onPress, onAnimationFinish }) {
     const [adrError, setAdrError] = useState(false);
     const [loaderVisible, setLoaderVisible] = useState(false);
     const [animationVisible, setAnimationVisible] = useState(false);
-    const { theme, onChangeTheme } = useContext(ThemeContext)
+    const { theme } = useContext(ThemeContext)
+
+    const showToast = () => {
+        ToastAndroid.show("تم إرسال الطلب بنجاح", ToastAndroid.SHORT);
+    }
 
     const handleSubmit = async () => {
         if (!name && !adress) {
@@ -43,11 +47,12 @@ export default function RequestDoctor({ onPress, onAnimationFinish }) {
             try {
                 const res = await requests.createRequest({ name, adress });
                 if (res.status === 'success') {
-                    console.log('request posted')
+                    //console.log('request posted')
                     setLoaderVisible(false);
                     setName('');
                     setAdress('');
                     setAnimationVisible(true)
+                    showToast()
                 }
             } catch (err) {
                 console.log(err);
