@@ -5,6 +5,7 @@ import { AppLoading } from 'expo';
 import AsyncStorage from '@react-native-community/async-storage'
 
 
+
 import DrawerNavigator from './navigation/DrawerNavigation';
 import { NavigationContainer } from '@react-navigation/native'
 import navigationTheme from './navigation/navigationTheme';
@@ -34,6 +35,7 @@ const fetchFont = async () => {
 
 export default function App() {
   const [fontLoaded, setFontLoaded] = useState(false);
+
 
 
   const [theme, setTheme] = useState({});

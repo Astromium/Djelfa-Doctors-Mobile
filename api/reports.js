@@ -1,5 +1,8 @@
 import axios from 'axios';
-const endPoint = 'https://djelfa-doctors.herokuapp.com/api/v1'
+import config from './config'
+
+
+const endPoint = config.baseUrl;
 
 const createReport = async (req) => {
     try {

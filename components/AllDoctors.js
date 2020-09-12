@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, ActivityIndicator, Modal, ScrollView, Dimensions } from 'react-native';
+import { View, StyleSheet, Modal, ScrollView, Dimensions } from 'react-native';
+
 import { BarChart } from 'react-native-chart-kit'
 import Swiper from 'react-native-swiper'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -22,7 +23,6 @@ import ThemeContext from '../themes/ThemeContext';
 
 
 
-
 export default function AllDoctors({ navigation }) {
 
     const { theme } = useContext(ThemeContext);
@@ -33,6 +33,8 @@ export default function AllDoctors({ navigation }) {
     const [modalVisible, setModalVisible] = useState(false)
     const [docs, setDocs] = useState([])
     const [backup, setBackup] = useState([])
+
+
 
 
     const loadDoctors = async () => {

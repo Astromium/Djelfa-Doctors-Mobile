@@ -1,8 +1,8 @@
-
+import config from './config'
 import cache from '../utility/cache'
 import axios from 'axios';
 
-const baseUrl = 'https://djelfa-doctors.herokuapp.com/api/v1/doctors';
+const baseUrl = `${config.baseUrl}/doctors`;
 
 
 const getAllDoctors = async () => {
