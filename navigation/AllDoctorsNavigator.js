@@ -50,7 +50,7 @@ const AllDoctorsNavigator = ({ navigation }) => {
             open: { animation: 'timing', config: { delay: 300 } },
             close: { animation: 'timing', config: { delay: 300 } },
           },
-          title: route.params.title,
+          title: route.params.data.name,
           headerStyle: { backgroundColor: theme.headerBg },
           headerTitleAlign: 'center',
           headerTintColor: colors.primary,
