@@ -12,10 +12,10 @@
     "@react-native-community/masked-view": "0.1.10",
     "@react-navigation/bottom-tabs": "^5.6.1",
     "@react-navigation/drawer": "^5.8.7",
-    "@react-navigation/native": "5",
-    "@react-navigation/stack": "^5.6.2",
+    "@react-navigation/native": "^5.0.9",
+    "@react-navigation/stack": "^5.1.1",
     "axios": "^0.19.2",
-    "expo": "~38.0.1",
+    "expo": "^38.0.10",
     "expo-font": "~8.2.1",
     "expo-location": "~8.2.1",
     "expo-mail-composer": "~8.2.1",
@@ -30,9 +30,11 @@
     "react-native-reanimated": "~1.9.0",
     "react-native-safe-area-context": "~3.0.7",
     "react-native-screens": "~2.9.0",
+    "react-native-shared-element": "^0.7.0",
     "react-native-svg": "12.1.0",
     "react-native-swiper": "^1.6.0",
-    "react-native-web": "~0.11.7"
+    "react-native-web": "~0.11.7",
+    "react-navigation-shared-element": "^5.0.0-alpha1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
