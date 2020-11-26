@@ -39,6 +39,9 @@ export default function Doctor({ route }) {
 
   let _isMounted = false;
   const { data } = route.params;
+  // console.log('====================================');
+  // console.log(data.coordinates);
+  // console.log('====================================');
 
   const fadeAnimation = useRef(new Animated.Value(0)).current;
   const fadeIn = () => {
@@ -70,9 +73,7 @@ export default function Doctor({ route }) {
   //         console.log(err)
   //     }
   // }
-  if (_isMounted) {
-    setDestination(`${data.coordinates[0]},${data.coordinates[1]}`);
-  }
+
 
   const requestLocation = async () => {
     try {
@@ -136,9 +137,13 @@ export default function Doctor({ route }) {
 
   useEffect(() => {
     _isMounted = true;
+    if (_isMounted) {
+      setDestination(`${data.coordinates[0]},${data.coordinates[1]}`);
+    }
     //loadDoctor();
     fadeIn();
     requestLocation();
+    //console.log(destination)
     return () => (_isMounted = false);
   }, []);
 
@@ -221,27 +226,27 @@ export default function Doctor({ route }) {
             {data.phone.length === 0 ? (
               <AppText>غير متوفر حاليا</AppText>
             ) : (
-              data.phone.map((num) => (
-                <View style={styles.phoneContainer} key={num}>
-                  <AppText style={[styles.detailText, { marginLeft: 20 }]}>
-                    0{num}
-                  </AppText>
+                data.phone.map((num) => (
+                  <View style={styles.phoneContainer} key={num}>
+                    <AppText style={[styles.detailText, { marginLeft: 20 }]}>
+                      0{num}
+                    </AppText>
 
-                  <TouchableOpacity
-                    onPress={() => Linking.openURL('tel:${0' + num + '}')}
-                    style={styles.callBtn}
-                  >
-                    <SimpleLineIcons
-                      style={{ marginLeft: 8 }}
-                      name='phone'
-                      color={theme.white}
-                      size={16}
-                    />
-                    <AppText>إتصل</AppText>
-                  </TouchableOpacity>
-                </View>
-              ))
-            )}
+                    <TouchableOpacity
+                      onPress={() => Linking.openURL('tel:${0' + num + '}')}
+                      style={styles.callBtn}
+                    >
+                      <SimpleLineIcons
+                        style={{ marginLeft: 8 }}
+                        name='phone'
+                        color={theme.white}
+                        size={16}
+                      />
+                      <AppText>إتصل</AppText>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              )}
           </View>
         </Animated.View>
 
@@ -308,8 +313,8 @@ export default function Doctor({ route }) {
                   </AppText>
                 </>
               ) : (
-                <ActivityIndicator size='small' />
-              )}
+                  <ActivityIndicator size='small' />
+                )}
             </TouchableOpacity>
           </View>
         </View>

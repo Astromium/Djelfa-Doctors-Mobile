@@ -35,9 +35,6 @@ const fetchFont = async () => {
 
 export default function App() {
   const [fontLoaded, setFontLoaded] = useState(false);
-
-
-
   const [theme, setTheme] = useState({});
 
   const fetchTheme = async () => {
